@@ -1,308 +1,286 @@
-# 🎨 ALEX UI
+<div align="center">
 
-Una librería de interfaz moderna, ligera y **100% compatible con Delta Executor en móvil**, diseñada para ser fácil de usar y con un diseño oscuro y elegante.
+# ◆ Alex-UI
 
-![Version](https://img.shields.io/badge/version-1.0.0-purple)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Roblox](https://img.shields.io/badge/roblox-compatible-red)
-![Delta](https://img.shields.io/badge/delta-mobile%20ready-green)
+**Modern & Lightweight UI Library for Roblox Executors**
 
----
+[![Version](https://img.shields.io/badge/version-1.0-8A2BE2?style=for-the-badge)](https://github.com/alexgamingofficial2026-del/Alex-UI)
+[![Lua](https://img.shields.io/badge/Lua-5.1-2C2D72?style=for-the-badge&logo=lua)](https://www.lua.org/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 
-## ✨ Características
+A modern, lightweight and customizable UI library for Roblox scripts.
 
-- 🎨 Diseño oscuro y elegante
-- 📱 **100% compatible con Delta Executor en móvil**
-- 🖱️ Ventana arrastrable y centrada por defecto
-- 📑 Sistema de pestañas (Tabs)
-- 🔘 Botones, Toggles, Sliders, Dropdowns
-- ✏️ Textboxes y Keybinds
-- 🎨 Colorpickers personalizables
-- 📢 Sistema de notificaciones
-- ⚡ Ligera y rápida (sin ScrollingFrame que causen bugs)
-- 🎭 3 temas: Default, SpeedHub, Midnight
+[Features](#-features) • [Installation](#-installation) • [Usage](#-quick-start) • [Components](#-components)
+
+</div>
 
 ---
 
-## 📦 Instalación
+## 📖 Description
 
-Carga la librería con `loadstring`:
+**Alex-UI** is a UI library written in **Luau** for Roblox executors such as Delta, Fluxus, Wave, Solara and Xeno.
+
+- ⚡ **Fast** — Animations powered by `TweenService`
+- 🎨 **Modern** — Dark design with purple accent
+- 📦 **Lightweight** — No external dependencies
+- 🔧 **Easy** — Intuitive API in 3 lines
+
+---
+
+## ✨ Features
+
+| Feature | Status |
+|---------|:------:|
+| Draggable window | ✅ |
+| Minimize / Close animation | ✅ |
+| Toggle key (hide/show) | ✅ |
+| Tabs with sidebar | ✅ |
+| Section separators | ✅ |
+| Toggle switch | ✅ |
+| Button with hover | ✅ |
+| Numeric slider | ✅ |
+| TextBox | ✅ |
+| Dropdown | ✅ |
+| Keybind | ✅ |
+| Notifications | ✅ |
+| Save / Load config | ✅ |
+
+---
+
+## 🚀 Installation
 
 ```lua
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/alexgamingofficial2026-del/Apex-UI/main/Source.lua"))()
+local AlexUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/alexgamingofficial2026-del/Alex-UI/main/Alex-UI.lua"))()
 ```
 
 ---
 
-## 🚀 Ejemplo de uso
+## 🎯 Quick Start
 
 ```lua
--- 1. Cargar la librería
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/alexgamingofficial2026-del/Apex-UI/main/Source.lua"))()
+-- 1. Load the library
+local AlexUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/alexgamingofficial2026-del/Alex-UI/main/Alex-UI.lua"))()
 
--- 2. Crear la ventana
-local Window = Library:CreateWindow("Mi Script")
+-- 2. Create the window
+local Window = AlexUI:CreateWindow({
+    Name = "My Script",
+    Subtitle = "v1.0 by Alex",
+    ToggleKey = Enum.KeyCode.RightShift
+})
 
--- 3. Crear una pestaña
-local Tab = Window:CreateTab("Principal")
+-- 3. Create a tab
+local MainTab = Window:CreateTab("Main")
 
--- 4. Crear una sección
-local Section = Tab:CreateSection("Movimiento")
-
--- 5. Añadir elementos
-Section:CreateButton("Mi Botón", function()
-    print("¡Botón pulsado!")
-end)
-
-Section:CreateToggle("Mi Toggle", false, function(state)
-    print("Estado:", state)
-end)
-
-Section:CreateSlider("Velocidad", 16, 300, 16, function(value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-end)
-
-Section:CreateDropdown("Seleccionar", {"Opción 1", "Opción 2"}, "Opción 1", function(value)
-    print("Seleccionaste:", value)
-end)
-
--- 6. Notificación
-Library:Notify("Mi Script", "Cargado correctamente", 3)
+-- 4. Add components
+MainTab:CreateButton({
+    Name = "Hello world!",
+    Callback = function()
+        AlexUI:Notify({
+            Title = "Alex-UI",
+            Text = "Working!"
+        })
+    end
+})
 ```
 
 ---
 
-## 📚 Funciones
+## 🧩 Components
 
-### 🪟 Ventana
+### Window
+```lua
+local Window = AlexUI:CreateWindow({
+    Name = "Alex-UI Demo",
+    Subtitle = "by Alex",
+    ToggleKey = Enum.KeyCode.RightShift
+})
+```
+
+### Tab
+```lua
+local Tab = Window:CreateTab("Name")
+```
+
+### Section
+```lua
+Tab:CreateSection("Movement")
+```
+
+### Toggle
+```lua
+Tab:CreateToggle({
+    Name = "Speed Hack",
+    Default = false,
+    Flag = "SpeedFlag",
+    Callback = function(state)
+        print("State:", state)
+    end
+})
+```
+
+### Button
+```lua
+Tab:CreateButton({
+    Name = "Execute",
+    Callback = function()
+        print("Click!")
+    end
+})
+```
+
+### Slider
+```lua
+Tab:CreateSlider({
+    Name = "Speed",
+    Min = 16,
+    Max = 300,
+    Default = 16,
+    Flag = "Speed",
+    Callback = function(value)
+        print("Value:", value)
+    end
+})
+```
+
+### TextBox
+```lua
+Tab:CreateTextBox({
+    Name = "Message",
+    Placeholder = "Type here...",
+    Callback = function(text)
+        print("You typed:", text)
+    end
+})
+```
+
+### Dropdown
+```lua
+Tab:CreateDropdown({
+    Name = "Theme",
+    Options = { "Purple", "Blue", "Red", "Green" },
+    Default = "Purple",
+    Flag = "Theme",
+    Callback = function(selected)
+        print("Selected:", selected)
+    end
+})
+```
+
+### Keybind
+```lua
+Tab:CreateKeybind({
+    Name = "Quick key",
+    Default = Enum.KeyCode.F,
+    Flag = "MyKey",
+    Callback = function()
+        print("Key pressed!")
+    end
+})
+```
+
+### Label
+```lua
+Tab:CreateLabel("Informative text")
+```
+
+### Notification
+```lua
+AlexUI:Notify({
+    Title = "Alex-UI",
+    Text = "Script loaded successfully",
+    Duration = 4
+})
+```
+
+### Save / Load config
+```lua
+Window:SaveConfig("my_config.json")
+Window:LoadConfig("my_config.json")
+```
+
+### Destroy UI
+```lua
+AlexUI:Destroy()
+```
+
+---
+
+## 🎨 Theme Customization
 
 ```lua
-local Window = Library:CreateWindow(title)
+AlexUI.Theme.Accent     = Color3.fromRGB(0, 170, 255)  -- Blue
+AlexUI.Theme.Background = Color3.fromRGB(15, 15, 15)   -- Background
+AlexUI.Theme.Text       = Color3.fromRGB(255, 255, 255)
 ```
 
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `title` | String | Nombre que aparece en la barra superior |
+### Default Palette
+
+| Name | Hex |
+|------|-----|
+| `Background` | `#121216` |
+| `Panel` | `#1A1A20` |
+| `Secondary` | `#22222A` |
+| `Accent` | `#8A2BE2` |
+| `AccentHover` | `#A046F0` |
+| `Text` | `#F0F0F5` |
+| `SubText` | `#9696A5` |
+| `Stroke` | `#2D2D37` |
+| `Danger` | `#DC3C3C` |
+| `Success` | `#3CC878` |
 
 ---
 
-### 📑 Pestañas (Tabs)
+## 📦 Project Structure
 
-```lua
-local Tab = Window:CreateTab(name)
 ```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Nombre de la pestaña |
-
----
-
-### 📂 Secciones
-
-```lua
-local Section = Tab:CreateSection(name)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Nombre de la sección |
-
----
-
-### 🔘 Botones
-
-```lua
-Section:CreateButton(name, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del botón |
-| `callback` | Function | Función que se ejecuta al hacer clic |
-
----
-
-### 🎚️ Toggles
-
-```lua
-Section:CreateToggle(name, default, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del toggle |
-| `default` | Bool | Estado inicial (`true` o `false`) |
-| `callback` | Function | Función que recibe el estado actual |
-
----
-
-### 📏 Sliders
-
-```lua
-Section:CreateSlider(name, min, max, default, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del slider |
-| `min` | Number | Valor mínimo |
-| `max` | Number | Valor máximo |
-| `default` | Number | Valor inicial |
-| `callback` | Function | Función que recibe el valor actual |
-
----
-
-### 📋 Dropdowns
-
-```lua
-Section:CreateDropdown(name, options, default, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del dropdown |
-| `options` | Table | Lista de opciones |
-| `default` | Any | Opción seleccionada por defecto |
-| `callback` | Function | Función que recibe la opción elegida |
-
----
-
-### ✏️ Textboxes
-
-```lua
-Section:CreateTextbox(name, placeholder, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del textbox |
-| `placeholder` | String | Texto de ayuda dentro de la caja |
-| `callback` | Function | Función que recibe el texto escrito |
-
----
-
-### 🎨 Colorpickers
-
-```lua
-Section:CreateColorpicker(name, default, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del colorpicker |
-| `default` | Color3 | Color inicial |
-| `callback` | Function | Función que recibe el color elegido |
-
----
-
-### ⌨️ Keybinds
-
-```lua
-Section:CreateKeybind(name, defaultKey, callback)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `name` | String | Texto del keybind |
-| `defaultKey` | String | Tecla por defecto (ej: `"F"`) |
-| `callback` | Function | Función que se ejecuta al pulsar la tecla |
-
----
-
-### 🏷️ Labels
-
-```lua
-Section:CreateLabel(text)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `text` | String | Texto de la etiqueta |
-
----
-
-### 📢 Notificaciones
-
-```lua
-Library:Notify(title, text, duration)
-```
-
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `title` | String | Título de la notificación |
-| `text` | String | Texto de la notificación |
-| `duration` | Number | Duración en segundos |
-
----
-
-## 🎨 Temas
-
-Puedes cambiar el tema de la librería:
-
-```lua
-Library:SetTheme("SpeedHub")
-```
-
-| Tema | Colores |
-|---|---|
-| `Default` | Púrpura elegante (Redz Hub style) |
-| `SpeedHub` | Rojo/negro (estilo Speed Hub X) |
-| `Midnight` | Azul oscuro |
-
----
-
-## 💾 Configuraciones
-
-Guarda y carga la configuración de tu UI:
-
-```lua
--- Guardar
-Library:SaveConfig("MiConfig")
-
--- Cargar
-Library:LoadConfig("MiConfig")
-
--- Eliminar
-Library:DeleteConfig("MiConfig")
+Alex-UI/
+├── Alex-UI.lua      # Main library
+├── README.md        # This file
+├── LICENSE          # MIT License
+└── examples/
+    └── demo.lua     # Example script
 ```
 
 ---
 
-## 📁 Estructura del repositorio
+## 🤝 Compatibility
 
-```
-Apex-UI/
-├── README.md          ← Este archivo
-├── Source.lua         ← Código de la librería
-├── Example.lua        ← Ejemplo de uso
-└── LICENSE            ← Licencia MIT
-```
-
----
-
-## 🤝 Contribuir
-
-Si quieres contribuir:
-
-1. Haz un **Fork** del repositorio
-2. Crea una rama: `git checkout -b feature/nueva-funcion`
-3. Haz commit: `git commit -m "Añadida nueva función"`
-4. Haz push: `git push origin feature/nueva-funcion`
-5. Abre un **Pull Request**
+| Executor | Status |
+|----------|:------:|
+| Delta | ✅ |
+| Fluxus | ✅ |
+| Wave | ✅ |
+| Solara | ✅ |
+| Xeno | ✅ |
+| Hydrogen | ✅ |
+| Codex | ✅ |
 
 ---
 
-## 📜 Licencia
+## ⚠️ Legal Notice
 
-Este proyecto está bajo la licencia **MIT**. Puedes usarlo, modificarlo y distribuirlo libremente.
+> This project is for **educational purposes only**. Using executors **violates the Roblox Terms of Service** and may result in a **permanent account ban**. The developers of Alex-UI are **not responsible** for any misuse.
 
 ---
 
-## ⭐ Créditos
+## 📜 License
 
-- **Creador**: AlexOfficial
-- **Inspiración**: Rayfield, Orion, WindUI
-- **Comunidad**: Discord de Roblox Scripting
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
-Si te gusta la librería, ¡dale una ⭐ al repositorio!
+---
+
+## 👤 Author
+
+**Alex** — [@alexgamingofficial2026-del](https://github.com/alexgamingofficial2026-del)
+
+Repo: [Alex-UI](https://github.com/alexgamingofficial2026-del/Alex-UI)
+
+---
+
+<div align="center">
+
+**⭐ If you like Alex-UI, give the repo a star ⭐**
+
+Made with 💜 by Alex
+
+</div>
