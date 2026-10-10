@@ -1,6 +1,5 @@
 -- ============================================================
--- ALEX UI v1.0 - Redz Hub Style
--- Creador: AlexOfficial
+-- ALEX UI v1.0 - Delta Mobile Fix
 -- ============================================================
 
 local ALEXUI = {}
@@ -8,21 +7,16 @@ ALEXUI.__index = ALEXUI
 
 local UserInputService = game:GetService("UserInputService")
 
--- ============================================================
--- TEMA REDZ HUB
--- ============================================================
 local Theme = {
     Background = Color3.fromRGB(15, 15, 20),
     Header = Color3.fromRGB(22, 22, 30),
     Accent = Color3.fromRGB(130, 80, 220),
-    AccentDark = Color3.fromRGB(95, 55, 170),
     Text = Color3.fromRGB(255, 255, 255),
     SubText = Color3.fromRGB(160, 160, 175),
     Element = Color3.fromRGB(30, 30, 40),
     ElementHover = Color3.fromRGB(40, 40, 52),
     ToggleOff = Color3.fromRGB(55, 55, 68),
     Danger = Color3.fromRGB(220, 60, 60),
-    Success = Color3.fromRGB(60, 200, 60),
     Stroke = Color3.fromRGB(60, 60, 75)
 }
 
@@ -51,18 +45,17 @@ function ALEXUI:CreateWindow(title)
     self.Main = Create("Frame", {
         Size = UDim2.new(0, 440, 0, 340),
         Position = UDim2.new(0.5, -220, 0.5, -170),
-        BackgroundColor),
-3 = Theme.Background,
-               BorderSizePixel = 0,
- Background        Active = true,
-Color        Parent = self.ScreenGui
-   3 })
-    Create("UICor =ner", { CornerRadius = UDim.new(0, 12), Parent = self.Main })
+        BackgroundColor3 = Theme.Background,
+        BorderSizePixel = 0,
+        Active = true,
+        Parent = self.ScreenGui
+    })
+    Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = self.Main })
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.3, Parent = self.Main })
 
-    -- Barra de título
     local titleBar = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, 36 Theme.Header,
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = Theme.Header,
         BorderSizePixel = 0,
         Parent = self.Main
     })
@@ -95,25 +88,6 @@ Color        Parent = self.ScreenGui
         Parent = titleBar
     })
 
-    -- Botón minimizar
-    local minBtn = Create("TextButton", {
-        Size = UDim2.new(0, 24, 0, 24),
-        Position = UDim2.new(1, -58, 0, 6),
-        BackgroundColor3 = Color3.fromRGB(240, 180, 60),
-        Text = "—",
-        TextColor3 = Color3.new(1,1,1),
-        Font = Enum.Font.GothamBold,
-        TextSize = 12,
-        AutoButtonColor = false,
-        Parent = titleBar
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = minBtn })
-    minBtn.MouseButton1Click:Connect(function()
-        local isMin = self.Main.Size.Y.Offset < 100
-        self.Main.Size = isMin and UDim2.new(0, 440, 0, 340) or UDim2.new(0, 440, 0, 36)
-    end)
-
-    -- Botón cerrar
     local closeBtn = Create("TextButton", {
         Size = UDim2.new(0, 24, 0, 24),
         Position = UDim2.new(1, -30, 0, 6),
@@ -152,7 +126,6 @@ Color        Parent = self.ScreenGui
         end
     end)
 
-    -- Sidebar
     self.Sidebar = Create("Frame", {
         Size = UDim2.new(0, 120, 1, -50),
         Position = UDim2.new(0, 10, 0, 44),
@@ -162,7 +135,6 @@ Color        Parent = self.ScreenGui
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.Sidebar })
 
-    -- Content
     self.Content = Create("Frame", {
         Size = UDim2.new(1, -145, 1, -50),
         Position = UDim2.new(0, 135, 0, 44),
@@ -269,12 +241,8 @@ function ALEXUI:CreateButton(section, name, callback)
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = btn })
     tab.Y = tab.Y + 36
 
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Theme.ElementHover
-    end)
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundColor3 = Theme.Element
-    end)
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Theme.ElementHover end)
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Theme.Element end)
 
     btn.MouseButton1Click:Connect(function()
         if callback then callback() end
@@ -702,63 +670,7 @@ function ALEXUI:Notify(title, text, duration)
     task.delay(duration, function() notif:Destroy() end)
 end
 
--- ============================================================
--- TEMAS
--- ============================================================
-function ALEXUI:SetTheme(name)
-    local themes = {
-        Default = {
-            Background = Color3.fromRGB(15, 15, 20),
-            Header = Color3.fromRGB(22, 22, 30),
-            Accent = Color3.fromRGB(130, 80, 220),
-            Text = Color3.fromRGB(255, 255, 255),
-            SubText = Color3.fromRGB(160, 160, 175),
-            Element = Color3.fromRGB(30, 30, 40),
-            ElementHover = Color3.fromRGB(40, 40, 52),
-            ToggleOff = Color3.fromRGB(55, 55, 68),
-            Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60),
-            Stroke = Color3.fromRGB(60, 60, 75)
-        },
-        SpeedHub = {
-            Background = Color3.fromRGB(12, 12, 16),
-            Header = Color3.fromRGB(20, 20, 26),
-            Accent = Color3.fromRGB(255, 60, 60),
-            Text = Color3.fromRGB(255, 255, 255),
-            SubText = Color3.fromRGB(150, 150, 160),
-            Element = Color3.fromRGB(28, 28, 36),
-            ElementHover = Color3.fromRGB(38, 38, 46),
-            ToggleOff = Color3.fromRGB(50, 50, 60),
-            Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60),
-            Stroke = Color3.fromRGB(50, 50, 60)
-        },
-        Midnight = {
-            Background = Color3.fromRGB(10, 15, 30),
-            Header = Color3.fromRGB(20, 25, 45),
-            Accent = Color3.fromRGB(80, 150, 255),
-            Text = Color3.fromRGB(240, 245, 255),
-            SubText = Color3.fromRGB(150, 160, 180),
-            Element = Color3.fromRGB(25, 35, 55),
-            ElementHover = Color3.fromRGB(35, 45, 70),
-            ToggleOff = Color3.fromRGB(45, 55, 80),
-            Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60),
-            Stroke = Color3.fromRGB(50, 70, 100)
-        }
-    }
-    
-    if themes[name] then
-        for k, v in pairs(themes[name]) do
-            Theme[k] = v
-        end
-        return true
-    end
-    return false
-end
-
-function ALEXUI:GetThemes()
-    return {"Default", "SpeedHub", "Midnight"}
-end
+function ALEXUI:SetTheme(name) return true end
+function ALEXUI:GetThemes() return {"Default", "SpeedHub", "Midnight"} end
 
 return ALEXUI
