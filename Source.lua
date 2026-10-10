@@ -1,5 +1,5 @@
 -- ============================================================
--- ALEX UI v1.0 - Delta Mobile Compatible
+-- ALEX UI v1.0 - Redz Hub Style
 -- Creador: AlexOfficial
 -- ============================================================
 
@@ -8,15 +8,22 @@ ALEXUI.__index = ALEXUI
 
 local UserInputService = game:GetService("UserInputService")
 
+-- ============================================================
+-- TEMA REDZ HUB
+-- ============================================================
 local Theme = {
     Background = Color3.fromRGB(15, 15, 20),
-    Header = Color3.fromRGB(25, 25, 32),
-    Accent = Color3.fromRGB(155, 92, 246),
+    Header = Color3.fromRGB(22, 22, 30),
+    Accent = Color3.fromRGB(130, 80, 220),
+    AccentDark = Color3.fromRGB(95, 55, 170),
     Text = Color3.fromRGB(255, 255, 255),
-    SubText = Color3.fromRGB(150, 150, 160),
-    Element = Color3.fromRGB(32, 32, 40),
+    SubText = Color3.fromRGB(160, 160, 175),
+    Element = Color3.fromRGB(30, 30, 40),
+    ElementHover = Color3.fromRGB(40, 40, 52),
+    ToggleOff = Color3.fromRGB(55, 55, 68),
     Danger = Color3.fromRGB(220, 60, 60),
-    Success = Color3.fromRGB(60, 200, 60)
+    Success = Color3.fromRGB(60, 200, 60),
+    Stroke = Color3.fromRGB(60, 60, 75)
 }
 
 local function Create(class, props)
@@ -42,57 +49,83 @@ function ALEXUI:CreateWindow(title)
     })
 
     self.Main = Create("Frame", {
-        Size = UDim2.new(0, 420, 0, 320),
-        Position = UDim2.new(0.5, -210, 0.5, -160),
-        BackgroundColor3 = Theme.Background,
-        BorderSizePixel = 0,
-        Active = true,
-        Parent = self.ScreenGui
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 14), Parent = self.Main })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1.5, Transparency = 0.3, Parent = self.Main })
+        Size = UDim2.new(0, 440, 0, 340),
+        Position = UDim2.new(0.5, -220, 0.5, -170),
+        BackgroundColor),
+3 = Theme.Background,
+               BorderSizePixel = 0,
+ Background        Active = true,
+Color        Parent = self.ScreenGui
+   3 })
+    Create("UICor =ner", { CornerRadius = UDim.new(0, 12), Parent = self.Main })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.3, Parent = self.Main })
 
     -- Barra de título
     local titleBar = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, 34),
-        BackgroundColor3 = Theme.Header,
+        Size = UDim2.new(1, 0, 0, 36 Theme.Header,
         BorderSizePixel = 0,
         Parent = self.Main
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 14), Parent = titleBar })
+    Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = titleBar })
+    Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 10),
+        Position = UDim2.new(0, 0, 1, -10),
+        BackgroundColor3 = Theme.Header,
+        BorderSizePixel = 0,
+        Parent = titleBar
+    })
 
     Create("Frame", {
-        Size = UDim2.new(0, 3, 0, 20),
-        Position = UDim2.new(0, 12, 0.5, -10),
+        Size = UDim2.new(0, 3, 0, 22),
+        Position = UDim2.new(0, 12, 0.5, -11),
         BackgroundColor3 = Theme.Accent,
         BorderSizePixel = 0,
         Parent = titleBar
     })
 
     Create("TextLabel", {
-        Size = UDim2.new(1, -80, 1, 0),
-        Position = UDim2.new(0, 22, 0, 0),
+        Size = UDim2.new(1, -100, 1, 0),
+        Position = UDim2.new(0, 24, 0, 0),
         BackgroundTransparency = 1,
         Text = title or "ALEX UI",
-        Text UColor3 = Theme.Text,
+        TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold,
-        TextSize = 13,
+        TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = titleBar
     })
 
+    -- Botón minimizar
+    local minBtn = Create("TextButton", {
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -58, 0, 6),
+        BackgroundColor3 = Color3.fromRGB(240, 180, 60),
+        Text = "—",
+        TextColor3 = Color3.new(1,1,1),
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        AutoButtonColor = false,
+        Parent = titleBar
+    })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = minBtn })
+    minBtn.MouseButton1Click:Connect(function()
+        local isMin = self.Main.Size.Y.Offset < 100
+        self.Main.Size = isMin and UDim2.new(0, 440, 0, 340) or UDim2.new(0, 440, 0, 36)
+    end)
+
+    -- Botón cerrar
     local closeBtn = Create("TextButton", {
-        Size = UDim2.new(0, 22, 0, 22),
-        Position = UDim2.new(1, -26, 0, 6),
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -30, 0, 6),
         BackgroundColor3 = Theme.Danger,
         Text = "X",
         TextColor3 = Color3.new(1,1,1),
         Font = Enum.Font.GothamBold,
-        TextSize = 11,
+        TextSize = 12,
         AutoButtonColor = false,
         Parent = titleBar
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 7), Parent = closeBtn })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = closeBtn })
     closeBtn.MouseButton1Click:Connect(function() self.ScreenGui:Destroy() end)
 
     -- Arrastrable
@@ -121,8 +154,8 @@ function ALEXUI:CreateWindow(title)
 
     -- Sidebar
     self.Sidebar = Create("Frame", {
-        Size = UDim2.new(0, 115, 1, -46),
-        Position = UDim2.new(0, 10, 0, 42),
+        Size = UDim2.new(0, 120, 1, -50),
+        Position = UDim2.new(0, 10, 0, 44),
         BackgroundColor3 = Theme.Header,
         BorderSizePixel = 0,
         Parent = self.Main
@@ -131,8 +164,8 @@ function ALEXUI:CreateWindow(title)
 
     -- Content
     self.Content = Create("Frame", {
-        Size = UDim2.new(1, -135, 1, -46),
-        Position =Dim2.new(0, 125, 0, 42),
+        Size = UDim2.new(1, -145, 1, -50),
+        Position = UDim2.new(0, 135, 0, 44),
         BackgroundColor3 = Theme.Header,
         BorderSizePixel = 0,
         ClipsDescendants = true,
@@ -150,13 +183,14 @@ function ALEXUI:CreateTab(name)
     local tab = { Name = name, Y = 10 }
 
     local btn = Create("TextButton", {
-        Size = UDim2.new(1, -12, 0, 28),
-        Position = UDim2.new(0, 6, 0, 6 + (#self.Tabs * 32)),
+        Size = UDim2.new(1, -12, 0, 30),
+        Position = UDim2.new(0, 6, 0, 6 + (#self.Tabs * 34)),
         BackgroundColor3 = Theme.Background,
-        Text = name,
-        TextColor3 = Theme.Text,
+        Text = "  " .. name,
+        TextColor3 = Theme.SubText,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
         AutoButtonColor = false,
         Parent = self.Sidebar
     })
@@ -176,9 +210,11 @@ function ALEXUI:CreateTab(name)
         for _, t in pairs(self.Tabs) do
             t.Frame.Visible = false
             t.Button.BackgroundColor3 = Theme.Background
+            t.Button.TextColor3 = Theme.SubText
         end
         frame.Visible = true
         btn.BackgroundColor3 = Theme.Accent
+        btn.TextColor3 = Theme.Text
         self.CurrentTab = tab
     end)
 
@@ -186,6 +222,7 @@ function ALEXUI:CreateTab(name)
     if #self.Tabs == 1 then
         frame.Visible = true
         btn.BackgroundColor3 = Theme.Accent
+        btn.TextColor3 = Theme.Text
         self.CurrentTab = tab
     end
 
@@ -197,13 +234,13 @@ end
 -- ============================================================
 function ALEXUI:CreateSection(tab, name)
     local label = Create("TextLabel", {
-        Size = UDim2.new(1, -16, 0, 22),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 22),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundTransparency = 1,
-        Text = "▸ " + name,
+        Text = "▸ " .. name,
         TextColor3 = Theme.Accent,
         Font = Enum.Font.GothamBold,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = tab.Frame
     })
@@ -218,19 +255,26 @@ end
 function ALEXUI:CreateButton(section, name, callback)
     local tab = section.Tab
     local btn = Create("TextButton", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Text = name,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         AutoButtonColor = false,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = btn })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = btn })
-    tab.Y = tab.Y + 34
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = btn })
+    tab.Y = tab.Y + 36
+
+    btn.MouseEnter:Connect(function()
+        btn.BackgroundColor3 = Theme.ElementHover
+    end)
+    btn.MouseLeave:Connect(function()
+        btn.BackgroundColor3 = Theme.Element
+    end)
 
     btn.MouseButton1Click:Connect(function()
         if callback then callback() end
@@ -247,40 +291,49 @@ function ALEXUI:CreateToggle(section, name, default, callback)
     local state = default or false
 
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
-    tab.Y = tab.Y + 34
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
+    tab.Y = tab.Y + 36
 
     Create("TextLabel", {
         Size = UDim2.new(1, -60, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+        Position = UDim2.new(0, 12, 0, 0),
         BackgroundTransparency = 1,
         Text = name,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = container
     })
 
     local toggleBtn = Create("TextButton", {
-        Size = UDim2.new(0, 36, 0, 18),
-        Position = UDim2.new(1, -46, 0.5, -9),
-        BackgroundColor3 = state and Theme.Accent or Theme.Element,
+        Size = UDim2.new(0, 38, 0, 20),
+        Position = UDim2.new(1, -48, 0.5, -10),
+        BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff,
         Text = "",
         AutoButtonColor = false,
         Parent = container
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = toggleBtn })
 
+    local circle = Create("Frame", {
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        Parent = toggleBtn
+    })
+    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = circle })
+
     toggleBtn.MouseButton1Click:Connect(function()
         state = not state
-        toggleBtn.BackgroundColor3 = state and Theme.Accent or Theme.Element
+        toggleBtn.BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff
+        circle.Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
         if callback then callback(state) end
     end)
 
@@ -297,30 +350,30 @@ function ALEXUI:CreateSlider(section, name, min, max, default, callback)
     local value = default or min
 
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 44),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 46),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
-    tab.Y = tab.Y + 48
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
+    tab.Y = tab.Y + 50
 
     local label = Create("TextLabel", {
         Size = UDim2.new(1, -20, 0, 16),
-        Position = UDim2.new(0, 10, 0, 5),
+        Position = UDim2.new(0, 12, 0, 5),
         BackgroundTransparency = 1,
         Text = name .. ": " .. value,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = container
     })
 
     local bar = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 6),
-        Position = UDim2.new(0, 10, 0, 28),
+        Size = UDim2.new(1, -24, 0, 6),
+        Position = UDim2.new(0, 12, 0, 30),
         BackgroundColor3 = Theme.Background,
         Parent = container
     })
@@ -367,37 +420,37 @@ end
 function ALEXUI:CreateDropdown(section, name, options, default, callback)
     local tab = section.Tab
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         ClipsDescendants = true,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
 
     local selected = default or (options and options[1]) or "Ninguno"
 
     local header = Create("TextButton", {
-        Size = UDim2.new(1, 0, 0, 30),
+        Size = UDim2.new(1, 0, 0, 32),
         BackgroundTransparency = 1,
         Text = name .. ": " .. tostring(selected) .. "  ▼",
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         AutoButtonColor = false,
         Parent = container
     })
 
     local listFrame = Create("Frame", {
-        Size = UDim2.new(1, -8, 0, 0),
-        Position = UDim2.new(0, 4, 0, 32),
+        Size = UDim2.new(1, -10, 0, 0),
+        Position = UDim2.new(0, 5, 0, 34),
         BackgroundTransparency = 1,
         Visible = false,
         Parent = container
     })
 
-    tab.Y = tab.Y + 34
+    tab.Y = tab.Y + 36
 
     local open = false
     header.MouseButton1Click:Connect(function()
@@ -408,13 +461,13 @@ function ALEXUI:CreateDropdown(section, name, options, default, callback)
             end
             for i, opt in pairs(options) do
                 local optBtn = Create("TextButton", {
-                    Size = UDim2.new(1, 0, 0, 24),
-                    Position = UDim2.new(0, 0, 0, (i - 1) * 26),
+                    Size = UDim2.new(1, 0, 0, 26),
+                    Position = UDim2.new(0, 0, 0, (i - 1) * 28),
                     BackgroundColor3 = Theme.Background,
                     Text = tostring(opt),
                     TextColor3 = Theme.Text,
                     Font = Enum.Font.Gotham,
-                    TextSize = 10,
+                    TextSize = 11,
                     Parent = listFrame
                 })
                 Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = optBtn })
@@ -422,17 +475,17 @@ function ALEXUI:CreateDropdown(section, name, options, default, callback)
                     selected = opt
                     header.Text = name .. ": " .. tostring(opt) .. "  ▼"
                     open = false
-                    container.Size = UDim2.new(1, -16, 0, 30)
+                    container.Size = UDim2.new(1, -20, 0, 32)
                     listFrame.Visible = false
                     if callback then callback(opt) end
                 end)
             end
-            local height = math.min(#options * 26, 120)
-            container.Size = UDim2.new(1, -16, 0, 30 + height + 4)
-            listFrame.Size = UDim2.new(1, -8, 0, height)
+            local height = math.min(#options * 28, 130)
+            container.Size = UDim2.new(1, -20, 0, 32 + height + 5)
+            listFrame.Size = UDim2.new(1, -10, 0, height)
             listFrame.Visible = true
         else
-            container.Size = UDim2.new(1, -16, 0, 30)
+            container.Size = UDim2.new(1, -20, 0, 32)
             listFrame.Visible = false
         end
     end)
@@ -446,25 +499,25 @@ end
 function ALEXUI:CreateTextbox(section, name, placeholder, callback)
     local tab = section.Tab
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
-    tab.Y = tab.Y + 34
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
+    tab.Y = tab.Y + 36
 
     local box = Create("TextBox", {
-        Size = UDim2.new(1, -20, 1, -8),
-        Position = UDim2.new(0, 10, 0, 4),
+        Size = UDim2.new(1, -24, 1, -8),
+        Position = UDim2.new(0, 12, 0, 4),
         BackgroundTransparency = 1,
         Text = "",
         PlaceholderText = placeholder or name,
         PlaceholderColor3 = Theme.SubText,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         ClearTextOnFocus = false,
         Parent = container
@@ -483,30 +536,30 @@ end
 function ALEXUI:CreateColorpicker(section, name, default, callback)
     local tab = section.Tab
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
-    tab.Y = tab.Y + 34
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
+    tab.Y = tab.Y + 36
 
     Create("TextLabel", {
         Size = UDim2.new(1, -60, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+        Position = UDim2.new(0, 12, 0, 0),
         BackgroundTransparency = 1,
         Text = name,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = container
     })
 
     local colorBtn = Create("TextButton", {
-        Size = UDim2.new(0, 36, 0, 20),
-        Position = UDim2.new(1, -46, 0.5, -10),
+        Size = UDim2.new(0, 38, 0, 20),
+        Position = UDim2.new(1, -48, 0.5, -10),
         BackgroundColor3 = default or Color3.fromRGB(255, 0, 0),
         Text = "",
         AutoButtonColor = false,
@@ -537,35 +590,35 @@ end
 function ALEXUI:CreateKeybind(section, name, defaultKey, callback)
     local tab = section.Tab
     local container = Create("Frame", {
-        Size = UDim2.new(1, -16, 0, 30),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 32),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundColor3 = Theme.Element,
         Parent = section.Frame
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1, Transparency = 0.6, Parent = container })
-    tab.Y = tab.Y + 34
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
+    tab.Y = tab.Y + 36
 
     Create("TextLabel", {
         Size = UDim2.new(1, -80, 1, 0),
-        Position = UDim2.new(0, 10, 0, 0),
+        Position = UDim2.new(0, 12, 0, 0),
         BackgroundTransparency = 1,
         Text = name,
         TextColor3 = Theme.Text,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = container
     })
 
     local keyBtn = Create("TextButton", {
-        Size = UDim2.new(0, 56, 0, 20),
-        Position = UDim2.new(1, -66, 0.5, -10),
+        Size = UDim2.new(0, 60, 0, 20),
+        Position = UDim2.new(1, -70, 0.5, -10),
         BackgroundColor3 = Theme.Background,
         Text = defaultKey or "NONE",
         TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold,
-        TextSize = 10,
+        TextSize = 11,
         AutoButtonColor = false,
         Parent = container
     })
@@ -595,13 +648,13 @@ end
 function ALEXUI:CreateLabel(section, text)
     local tab = section.Tab
     local label = Create("TextLabel", {
-        Size = UDim2.new(1, -16, 0, 22),
-        Position = UDim2.new(0, 8, 0, tab.Y),
+        Size = UDim2.new(1, -20, 0, 22),
+        Position = UDim2.new(0, 10, 0, tab.Y),
         BackgroundTransparency = 1,
         Text = text,
         TextColor3 = Theme.SubText,
         Font = Enum.Font.Gotham,
-        TextSize = 10,
+        TextSize = 11,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = section.Frame
     })
@@ -617,18 +670,18 @@ function ALEXUI:Notify(title, text, duration)
     duration = duration or 3
     notifCount = notifCount + 1
     local notif = Create("Frame", {
-        Size = UDim2.new(0, 250, 0, 56),
-        Position = UDim2.new(1, -260, 0, 20 + (notifCount - 1) * 66),
+        Size = UDim2.new(0, 260, 0, 60),
+        Position = UDim2.new(1, -270, 0, 20 + (notifCount - 1) * 70),
         BackgroundColor3 = Theme.Header,
         BorderSizePixel = 0,
         Parent = self.ScreenGui
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = notif })
-    Create("UIStroke", { Color = Color3.new(1,1,1), Thickness = 1.5, Transparency = 0.3, Parent = notif })
+    Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = notif })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.3, Parent = notif })
 
     Create("Frame", {
-        Size = UDim2.new(0, 3, 0, 30),
-        Position = UDim2.new(0, 8, 0.5, -15),
+        Size = UDim2.new(0, 3, 0, 32),
+        Position = UDim2.new(0, 8, 0.5, -16),
         BackgroundColor3 = Theme.Accent,
         BorderSizePixel = 0,
         Parent = notif
@@ -637,13 +690,13 @@ function ALEXUI:Notify(title, text, duration)
     Create("TextLabel", {
         Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 18, 0, 8),
         BackgroundTransparency = 1, Text = title, TextColor3 = Theme.Accent,
-        Font = Enum.Font.GothamBold, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
+        Font = Enum.Font.GothamBold, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
     })
 
     Create("TextLabel", {
-        Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 18, 0, 28),
+        Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 18, 0, 30),
         BackgroundTransparency = 1, Text = text, TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
+        Font = Enum.Font.Gotham, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
     })
 
     task.delay(duration, function() notif:Destroy() end)
@@ -656,13 +709,16 @@ function ALEXUI:SetTheme(name)
     local themes = {
         Default = {
             Background = Color3.fromRGB(15, 15, 20),
-            Header = Color3.fromRGB(25, 25, 32),
-            Accent = Color3.fromRGB(155, 92, 246),
+            Header = Color3.fromRGB(22, 22, 30),
+            Accent = Color3.fromRGB(130, 80, 220),
             Text = Color3.fromRGB(255, 255, 255),
-            SubText = Color3.fromRGB(150, 150, 160),
-            Element = Color3.fromRGB(32, 32, 40),
+            SubText = Color3.fromRGB(160, 160, 175),
+            Element = Color3.fromRGB(30, 30, 40),
+            ElementHover = Color3.fromRGB(40, 40, 52),
+            ToggleOff = Color3.fromRGB(55, 55, 68),
             Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60)
+            Success = Color3.fromRGB(60, 200, 60),
+            Stroke = Color3.fromRGB(60, 60, 75)
         },
         SpeedHub = {
             Background = Color3.fromRGB(12, 12, 16),
@@ -671,8 +727,11 @@ function ALEXUI:SetTheme(name)
             Text = Color3.fromRGB(255, 255, 255),
             SubText = Color3.fromRGB(150, 150, 160),
             Element = Color3.fromRGB(28, 28, 36),
+            ElementHover = Color3.fromRGB(38, 38, 46),
+            ToggleOff = Color3.fromRGB(50, 50, 60),
             Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60)
+            Success = Color3.fromRGB(60, 200, 60),
+            Stroke = Color3.fromRGB(50, 50, 60)
         },
         Midnight = {
             Background = Color3.fromRGB(10, 15, 30),
@@ -681,8 +740,11 @@ function ALEXUI:SetTheme(name)
             Text = Color3.fromRGB(240, 245, 255),
             SubText = Color3.fromRGB(150, 160, 180),
             Element = Color3.fromRGB(25, 35, 55),
+            ElementHover = Color3.fromRGB(35, 45, 70),
+            ToggleOff = Color3.fromRGB(45, 55, 80),
             Danger = Color3.fromRGB(220, 60, 60),
-            Success = Color3.fromRGB(60, 200, 60)
+            Success = Color3.fromRGB(60, 200, 60),
+            Stroke = Color3.fromRGB(50, 70, 100)
         }
     }
     
