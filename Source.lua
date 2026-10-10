@@ -1,676 +1,1001 @@
--- ============================================================
--- ALEX UI v1.0 - Delta Mobile Fix
--- ============================================================
+--[[
+    █████╗ ██╗     ███████╗██╗  ██╗   ██╗   ██╗██╗
+    ██╔══██╗██║     ██╔════╝╚██╗██╔╝   ██║   ██║██║
+    ███████║██║     █████╗   ╚███╔╝    ██║   ██║██║
+    ██╔══██║██║     ██╔══╝   ██╔██╗    ██║   ██║██║
+    ██║  ██║███████╗███████╗██╔╝ ██╗   ╚██████╔╝██║
+    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝    ╚═════╝ ╚═╝
 
-local ALEXUI = {}
-ALEXUI.__index = ALEXUI
+    Alex-UI  •  v1.0
+    Modern UI Library for Roblox Executors
+    Author: Alex
+]]
 
-local UserInputService = game:GetService("UserInputService")
+local AlexUI = {}
+AlexUI.__index = AlexUI
 
-local Theme = {
-    Background = Color3.fromRGB(15, 15, 20),
-    Header = Color3.fromRGB(22, 22, 30),
-    Accent = Color3.fromRGB(130, 80, 220),
-    Text = Color3.fromRGB(255, 255, 255),
-    SubText = Color3.fromRGB(160, 160, 175),
-    Element = Color3.fromRGB(30, 30, 40),
-    ElementHover = Color3.fromRGB(40, 40, 52),
-    ToggleOff = Color3.fromRGB(55, 55, 68),
-    Danger = Color3.fromRGB(220, 60, 60),
-    Stroke = Color3.fromRGB(60, 60, 75)
+-- ============================================
+-- SERVICIOS
+-- ============================================
+local Players           = game:GetService("Players")
+local UserInputService  = game:GetService("UserInputService")
+local TweenService      = game:GetService("TweenService")
+local RunService        = game:GetService("RunService")
+local CoreGui           = game:GetService("CoreGui")
+local LocalPlayer       = Players.LocalPlayer
+
+-- ============================================
+-- TEMA POR DEFECTO
+-- ============================================
+AlexUI.Theme = {
+    Background   = Color3.fromRGB(18, 18, 22),
+    Panel        = Color3.fromRGB(26, 26, 32),
+    Secondary    = Color3.fromRGB(34, 34, 42),
+    Accent       = Color3.fromRGB(138, 43, 226),   -- Morado Alex
+    AccentHover  = Color3.fromRGB(160, 70, 240),
+    Text         = Color3.fromRGB(240, 240, 245),
+    SubText      = Color3.fromRGB(150, 150, 165),
+    Stroke       = Color3.fromRGB(45, 45, 55),
+    Danger       = Color3.fromRGB(220, 60, 60),
+    Success      = Color3.fromRGB(60, 200, 120),
 }
 
-local function Create(class, props)
-    local i = Instance.new(class)
-    for k, v in pairs(props or {}) do i[k] = v end
-    return i
+AlexUI.Version = "1.0"
+AlexUI.Name    = "Alex-UI"
+
+-- ============================================
+-- UTILIDADES INTERNAS
+-- ============================================
+local function create(className, props)
+    local inst = Instance.new(className)
+    for k, v in pairs(props or {}) do
+        inst[k] = v
+    end
+    return inst
 end
 
--- ============================================================
--- VENTANA
--- ============================================================
-function ALEXUI:CreateWindow(title)
-    local self = setmetatable({}, ALEXUI)
-    self.Tabs = {}
-    self.CurrentTab = nil
+local function corner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius or 6)
+    c.Parent = parent
+    return c
+end
 
-    self.ScreenGui = Create("ScreenGui", {
-        Name = "ALEXUI",
+local function stroke(parent, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or AlexUI.Theme.Stroke
+    s.Thickness = thickness or 1
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    s.Parent = parent
+    return s
+end
+
+local function padding(parent, t, r, b, l)
+    local p = Instance.new("UIPadding")
+    p.PaddingTop    = UDim.new(0, t or 0)
+    p.PaddingRight  = UDim.new(0, r or 0)
+    p.PaddingBottom = UDim.new(0, b or 0)
+    p.PaddingLeft   = UDim.new(0, l or 0)
+    p.Parent = parent
+    return p
+end
+
+-- ============================================
+-- VENTANA PRINCIPAL
+-- ============================================
+function AlexUI:CreateWindow(config)
+    config = config or {}
+    local self = setmetatable({}, AlexUI)
+
+    self.Name       = config.Name or "Alex-UI"
+    self.Subtitle   = config.Subtitle or "by Alex"
+    self.ToggleKey  = config.ToggleKey or Enum.KeyCode.RightShift
+    self.Tabs       = {}
+    self.Flags      = {}
+    self.Connections = {}
+
+    -- ScreenGui
+    self.ScreenGui = create("ScreenGui", {
+        Name = "AlexUI",
         ResetOnSpawn = false,
-        DisplayOrder = 999999,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         IgnoreGuiInset = true,
-        Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     })
 
-    self.Main = Create("Frame", {
-        Size = UDim2.new(0, 440, 0, 340),
-        Position = UDim2.new(0.5, -220, 0.5, -170),
-        BackgroundColor3 = Theme.Background,
+    -- Protección al intentar usar CoreGui
+    local ok = pcall(function()
+        self.ScreenGui.Parent = CoreGui
+    end)
+    if not ok then
+        self.ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    end
+
+    -- Frame principal
+    self.Main = create("Frame", {
+        Name = "Main",
+        Size = UDim2.new(0, 580, 0, 380),
+        Position = UDim2.new(0.5, -290, 0.5, -190),
+        BackgroundColor3 = self.Theme.Background,
         BorderSizePixel = 0,
         Active = true,
-        Parent = self.ScreenGui
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = self.Main })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.3, Parent = self.Main })
+    self.Main.Parent = self.ScreenGui
+    corner(self.Main, 10)
+    stroke(self.Main, self.Theme.Stroke, 1)
 
-    local titleBar = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, 36),
-        BackgroundColor3 = Theme.Header,
-        BorderSizePixel = 0,
-        Parent = self.Main
+    -- Sombra
+    local shadow = create("ImageLabel", {
+        Size = UDim2.new(1, 40, 1, 40),
+        Position = UDim2.new(0, -20, 0, -20),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://5028857472",
+        ImageColor3 = Color3.new(0, 0, 0),
+        ImageTransparency = 0.5,
+        ZIndex = 0,
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 12), Parent = titleBar })
-    Create("Frame", {
+    shadow.Parent = self.Main
+
+    -- Header
+    self.Header = create("Frame", {
+        Name = "Header",
+        Size = UDim2.new(1, 0, 0, 42),
+        BackgroundColor3 = self.Theme.Panel,
+        BorderSizePixel = 0,
+    })
+    self.Header.Parent = self.Main
+    local hc = corner(self.Header, 10)
+    -- Solo redondear arriba
+    local headerFix = create("Frame", {
         Size = UDim2.new(1, 0, 0, 10),
         Position = UDim2.new(0, 0, 1, -10),
-        BackgroundColor3 = Theme.Header,
+        BackgroundColor3 = self.Theme.Panel,
         BorderSizePixel = 0,
-        Parent = titleBar
     })
+    headerFix.Parent = self.Header
 
-    Create("Frame", {
-        Size = UDim2.new(0, 3, 0, 22),
-        Position = UDim2.new(0, 12, 0.5, -11),
-        BackgroundColor3 = Theme.Accent,
-        BorderSizePixel = 0,
-        Parent = titleBar
-    })
-
-    Create("TextLabel", {
-        Size = UDim2.new(1, -100, 1, 0),
-        Position = UDim2.new(0, 24, 0, 0),
+    -- Logo / Nombre
+    local logo = create("TextLabel", {
+        Size = UDim2.new(1, -120, 1, 0),
+        Position = UDim2.new(0, 16, 0, 0),
         BackgroundTransparency = 1,
-        Text = title or "ALEX UI",
-        TextColor3 = Theme.Text,
+        Text = "◆ " .. self.Name,
+        TextColor3 = self.Theme.Accent,
+        TextSize = 17,
         Font = Enum.Font.GothamBold,
-        TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = titleBar
     })
+    logo.Parent = self.Header
 
-    local closeBtn = Create("TextButton", {
-        Size = UDim2.new(0, 24, 0, 24),
-        Position = UDim2.new(1, -30, 0, 6),
-        BackgroundColor3 = Theme.Danger,
-        Text = "X",
-        TextColor3 = Color3.new(1,1,1),
-        Font = Enum.Font.GothamBold,
+    -- Subtítulo
+    local subtitle = create("TextLabel", {
+        Size = UDim2.new(0, 100, 1, 0),
+        Position = UDim2.new(1, -140, 0, 0),
+        BackgroundTransparency = 1,
+        Text = self.Subtitle,
+        TextColor3 = self.Theme.SubText,
         TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Right,
+    })
+    subtitle.Parent = self.Header
+
+    -- Botón minimizar
+    local minBtn = create("TextButton", {
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -60, 0.5, -12),
+        BackgroundColor3 = self.Theme.Secondary,
+        Text = "—",
+        TextColor3 = self.Theme.Text,
+        TextSize = 16,
+        Font = Enum.Font.GothamBold,
+        BorderSizePixel = 0,
         AutoButtonColor = false,
-        Parent = titleBar
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = closeBtn })
-    closeBtn.MouseButton1Click:Connect(function() self.ScreenGui:Destroy() end)
+    minBtn.Parent = self.Header
+    corner(minBtn, 6)
 
-    -- Arrastrable
-    local dragging, dragStart, startPos
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = self.Main.Position
-        end
-    end)
-    titleBar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            self.Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    self.Sidebar = Create("Frame", {
-        Size = UDim2.new(0, 120, 1, -50),
-        Position = UDim2.new(0, 10, 0, 44),
-        BackgroundColor3 = Theme.Header,
+    -- Botón cerrar
+    local closeBtn = create("TextButton", {
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -32, 0.5, -12),
+        BackgroundColor3 = self.Theme.Danger,
+        Text = "×",
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 18,
+        Font = Enum.Font.GothamBold,
         BorderSizePixel = 0,
-        Parent = self.Main
+        AutoButtonColor = false,
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.Sidebar })
+    closeBtn.Parent = self.Header
+    corner(closeBtn, 6)
 
-    self.Content = Create("Frame", {
-        Size = UDim2.new(1, -145, 1, -50),
-        Position = UDim2.new(0, 135, 0, 44),
-        BackgroundColor3 = Theme.Header,
+    -- Sidebar
+    self.Sidebar = create("Frame", {
+        Name = "Sidebar",
+        Size = UDim2.new(0, 140, 1, -42),
+        Position = UDim2.new(0, 0, 0, 42),
+        BackgroundColor3 = self.Theme.Panel,
         BorderSizePixel = 0,
-        ClipsDescendants = true,
-        Parent = self.Main
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.Content })
+    self.Sidebar.Parent = self.Main
+    padding(self.Sidebar, 10, 8, 10, 8)
+    local sidebarList = create("UIListLayout", {
+        Padding = UDim.new(0, 5),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = self.Sidebar,
+    })
+
+    -- Contenedor de páginas
+    self.PageContainer = create("Frame", {
+        Name = "Pages",
+        Size = UDim2.new(1, -140, 1, -42),
+        Position = UDim2.new(0, 140, 0, 42),
+        BackgroundTransparency = 1,
+    })
+    self.PageContainer.Parent = self.Main
+
+    -- ========== ARRASTRAR VENTANA ==========
+    do
+        local dragging, dragStart, startPos
+        self.Header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = self.Main.Position
+            end
+        end)
+        table.insert(self.Connections, UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - dragStart
+                self.Main.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + delta.X,
+                    startPos.Y.Scale, startPos.Y.Offset + delta.Y
+                )
+            end
+        end))
+        table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end))
+    end
+
+    -- ========== MINIMIZAR ==========
+    local minimized = false
+    minBtn.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        local target = minimized and UDim2.new(0, 580, 0, 42) or UDim2.new(0, 580, 0, 380)
+        TweenService:Create(self.Main, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+            Size = target
+        }):Play()
+        self.PageContainer.Visible = not minimized
+        self.Sidebar.Visible = not minimized
+        minBtn.Text = minimized and "+" or "—"
+    end)
+
+    -- ========== CERRAR ==========
+    closeBtn.MouseButton1Click:Connect(function()
+        TweenService:Create(self.Main, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+        }):Play()
+        task.wait(0.25)
+        self.ScreenGui.Enabled = false
+    end)
+
+    -- ========== TOGGLE KEY ==========
+    table.insert(self.Connections, UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode == self.ToggleKey then
+            self.ScreenGui.Enabled = not self.ScreenGui.Enabled
+        end
+    end))
 
     return self
 end
 
--- ============================================================
--- TAB
--- ============================================================
-function ALEXUI:CreateTab(name)
-    local tab = { Name = name, Y = 10 }
+-- ============================================
+-- CREAR TAB
+-- ============================================
+function AlexUI:CreateTab(tabName)
+    local tab = {
+        Name = tabName or "Tab",
+        Library = self,
+    }
+    setmetatable(tab, { __index = AlexUI })
 
-    local btn = Create("TextButton", {
-        Size = UDim2.new(1, -12, 0, 30),
-        Position = UDim2.new(0, 6, 0, 6 + (#self.Tabs * 34)),
-        BackgroundColor3 = Theme.Background,
-        Text = "  " .. name,
-        TextColor3 = Theme.SubText,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
+    -- Botón sidebar
+    local btn = create("TextButton", {
+        Name = tabName,
+        Size = UDim2.new(1, 0, 0, 34),
+        BackgroundColor3 = self.Theme.Background,
+        Text = tabName,
+        TextColor3 = self.Theme.SubText,
+        TextSize = 13,
+        Font = Enum.Font.GothamMedium,
+        BorderSizePixel = 0,
         AutoButtonColor = false,
-        Parent = self.Sidebar
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = btn })
+    btn.Parent = self.Sidebar
+    corner(btn, 6)
 
-    local frame = Create("Frame", {
+    -- Página
+    local page = create("ScrollingFrame", {
+        Name = tabName .. "Page",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = self.Theme.Accent,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
         Visible = false,
-        Parent = self.Content
     })
-
-    tab.Button = btn
-    tab.Frame = frame
-
-    btn.MouseButton1Click:Connect(function()
-        for _, t in pairs(self.Tabs) do
-            t.Frame.Visible = false
-            t.Button.BackgroundColor3 = Theme.Background
-            t.Button.TextColor3 = Theme.SubText
-        end
-        frame.Visible = true
-        btn.BackgroundColor3 = Theme.Accent
-        btn.TextColor3 = Theme.Text
-        self.CurrentTab = tab
+    page.Parent = self.PageContainer
+    padding(page, 14, 12, 14, 12)
+    local list = create("UIListLayout", {
+        Padding = UDim.new(0, 8),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = page,
+    })
+    list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        page.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 28)
     end)
 
-    table.insert(self.Tabs, tab)
-    if #self.Tabs == 1 then
-        frame.Visible = true
-        btn.BackgroundColor3 = Theme.Accent
-        btn.TextColor3 = Theme.Text
-        self.CurrentTab = tab
+    -- Seleccionar tab
+    local function select()
+        for _, child in pairs(self.PageContainer:GetChildren()) do
+            if child:IsA("ScrollingFrame") then child.Visible = false end
+        end
+        for _, child in pairs(self.Sidebar:GetChildren()) do
+            if child:IsA("TextButton") then
+                TweenService:Create(child, TweenInfo.new(0.15), {
+                    BackgroundColor3 = self.Theme.Background,
+                    TextColor3 = self.Theme.SubText,
+                }):Play()
+            end
+        end
+        page.Visible = true
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = self.Theme.Accent,
+            TextColor3 = Color3.new(1, 1, 1),
+        }):Play()
     end
+
+    btn.MouseButton1Click:Connect(select)
+    btn.MouseEnter:Connect(function()
+        if not page.Visible then
+            TweenService:Create(btn, TweenInfo.new(0.15), {
+                BackgroundColor3 = self.Theme.Secondary,
+            }):Play()
+        end
+    end)
+    btn.MouseLeave:Connect(function()
+        if not page.Visible then
+            TweenService:Create(btn, TweenInfo.new(0.15), {
+                BackgroundColor3 = self.Theme.Background,
+            }):Play()
+        end
+    end)
+
+    if #self.Tabs == 0 then select() end
+    table.insert(self.Tabs, tab)
+
+    tab.Page = page
+    tab.Button = btn
+    tab.List = list
 
     return tab
 end
 
--- ============================================================
--- SECTION
--- ============================================================
-function ALEXUI:CreateSection(tab, name)
-    local label = Create("TextLabel", {
-        Size = UDim2.new(1, -20, 0, 22),
-        Position = UDim2.new(0, 10, 0, tab.Y),
+-- ============================================
+-- COMPONENTES
+-- ============================================
+
+-- Separador / Section
+function AlexUI:CreateSection(tab, text)
+    local frame = create("Frame", {
+        Size = UDim2.new(1, 0, 0, 26),
         BackgroundTransparency = 1,
-        Text = "▸ " .. name,
-        TextColor3 = Theme.Accent,
+    })
+    frame.Parent = tab.Page
+
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = string.upper(text or "SECTION"),
+        TextColor3 = self.Theme.SubText,
+        TextSize = 11,
         Font = Enum.Font.GothamBold,
-        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = tab.Frame
     })
-    tab.Y = tab.Y + 26
+    label.Parent = frame
 
-    return { Name = name, Frame = tab.Frame, Tab = tab }
+    local line = create("Frame", {
+        Size = UDim2.new(1, -100, 0, 1),
+        Position = UDim2.new(0, 100, 0.5, 0),
+        BackgroundColor3 = self.Theme.Stroke,
+        BorderSizePixel = 0,
+    })
+    line.Parent = frame
+    return frame
 end
 
--- ============================================================
--- BOTÓN
--- ============================================================
-function ALEXUI:CreateButton(section, name, callback)
-    local tab = section.Tab
-    local btn = Create("TextButton", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Text = name,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        AutoButtonColor = false,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = btn })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = btn })
-    tab.Y = tab.Y + 36
+-- Toggle
+function AlexUI:CreateToggle(tab, config)
+    config = config or {}
+    local state = config.Default or false
+    local flag = config.Flag
 
-    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Theme.ElementHover end)
-    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Theme.Element end)
-
-    btn.MouseButton1Click:Connect(function()
-        if callback then callback() end
-    end)
-
-    return btn
-end
-
--- ============================================================
--- TOGGLE
--- ============================================================
-function ALEXUI:CreateToggle(section, name, default, callback)
-    local tab = section.Tab
-    local state = default or false
-
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-    tab.Y = tab.Y + 36
-
-    Create("TextLabel", {
-        Size = UDim2.new(1, -60, 1, 0),
-        Position = UDim2.new(0, 12, 0, 0),
-        BackgroundTransparency = 1,
-        Text = name,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = container
-    })
-
-    local toggleBtn = Create("TextButton", {
-        Size = UDim2.new(0, 38, 0, 20),
-        Position = UDim2.new(1, -48, 0.5, -10),
-        BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff,
+    local frame = create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 38),
+        BackgroundColor3 = self.Theme.Secondary,
         Text = "",
         AutoButtonColor = false,
-        Parent = container
+        BorderSizePixel = 0,
     })
-    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = toggleBtn })
+    frame.Parent = tab.Page
+    corner(frame, 6)
+    stroke(frame, self.Theme.Stroke, 1)
 
-    local circle = Create("Frame", {
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, -70, 1, 0),
+        Position = UDim2.new(0, 14, 0, 0),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Toggle",
+        TextColor3 = self.Theme.Text,
+        TextSize = 13,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    label.Parent = frame
+
+    local indicator = create("Frame", {
+        Size = UDim2.new(0, 38, 0, 20),
+        Position = UDim2.new(1, -50, 0.5, -10),
+        BackgroundColor3 = state and self.Theme.Accent or Color3.fromRGB(60, 60, 70),
+        BorderSizePixel = 0,
+    })
+    indicator.Parent = frame
+    corner(indicator, 10)
+
+    local knob = create("Frame", {
         Size = UDim2.new(0, 16, 0, 16),
         Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
         BackgroundColor3 = Color3.new(1, 1, 1),
-        Parent = toggleBtn
+        BorderSizePixel = 0,
+        ZIndex = 2,
     })
-    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = circle })
+    knob.Parent = indicator
+    corner(knob, 8)
 
-    toggleBtn.MouseButton1Click:Connect(function()
-        state = not state
-        toggleBtn.BackgroundColor3 = state and Theme.Accent or Theme.ToggleOff
-        circle.Position = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-        if callback then callback(state) end
-    end)
+    local function setState(v, silent)
+        state = v
+        if flag then self.Flags[flag] = v end
+        TweenService:Create(indicator, TweenInfo.new(0.2), {
+            BackgroundColor3 = v and self.Theme.Accent or Color3.fromRGB(60, 60, 70),
+        }):Play()
+        TweenService:Create(knob, TweenInfo.new(0.2), {
+            Position = v and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+        }):Play()
+        if not silent and config.Callback then task.spawn(config.Callback, v) end
+    end
 
-    return toggleBtn
+    frame.MouseButton1Click:Connect(function() setState(not state) end)
+    if flag then self.Flags[flag] = state end
+
+    return { Set = setState, Get = function() return state end }
 end
 
--- ============================================================
--- SLIDER
--- ============================================================
-function ALEXUI:CreateSlider(section, name, min, max, default, callback)
-    local tab = section.Tab
-    min = min or 0
-    max = max or 100
-    local value = default or min
+-- Button
+function AlexUI:CreateButton(tab, config)
+    config = config or {}
 
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 46),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-    tab.Y = tab.Y + 50
-
-    local label = Create("TextLabel", {
-        Size = UDim2.new(1, -20, 0, 16),
-        Position = UDim2.new(0, 12, 0, 5),
-        BackgroundTransparency = 1,
-        Text = name .. ": " .. value,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = container
-    })
-
-    local bar = Create("Frame", {
-        Size = UDim2.new(1, -24, 0, 6),
-        Position = UDim2.new(0, 12, 0, 30),
-        BackgroundColor3 = Theme.Background,
-        Parent = container
-    })
-    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = bar })
-
-    local fill = Create("Frame", {
-        Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
-        BackgroundColor3 = Theme.Accent,
+    local btn = create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = self.Theme.Accent,
+        Text = config.Name or "Button",
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 13,
+        Font = Enum.Font.GothamSemibold,
         BorderSizePixel = 0,
-        Parent = bar
+        AutoButtonColor = false,
     })
-    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = fill })
+    btn.Parent = tab.Page
+    corner(btn, 6)
+
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = self.Theme.AccentHover,
+        }):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = self.Theme.Accent,
+        }):Play()
+    end)
+    btn.MouseButton1Click:Connect(function()
+        if config.Callback then task.spawn(config.Callback) end
+    end)
+    return btn
+end
+
+-- Slider
+function AlexUI:CreateSlider(tab, config)
+    config = config or {}
+    local min = config.Min or 0
+    local max = config.Max or 100
+    local value = config.Default or min
+    local flag = config.Flag
+
+    local frame = create("Frame", {
+        Size = UDim2.new(1, 0, 0, 52),
+        BackgroundColor3 = self.Theme.Secondary,
+        BorderSizePixel = 0,
+    })
+    frame.Parent = tab.Page
+    corner(frame, 6)
+    stroke(frame, self.Theme.Stroke, 1)
+
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 20),
+        Position = UDim2.new(0, 14, 0, 6),
+        BackgroundTransparency = 1,
+        Text = (config.Name or "Slider") .. ": " .. value,
+        TextColor3 = self.Theme.Text,
+        TextSize = 13,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    label.Parent = frame
+
+    local barBg = create("Frame", {
+        Size = UDim2.new(1, -28, 0, 6),
+        Position = UDim2.new(0, 14, 0, 34),
+        BackgroundColor3 = Color3.fromRGB(50, 50, 60),
+        BorderSizePixel = 0,
+    })
+    barBg.Parent = frame
+    corner(barBg, 3)
+
+    local fill = create("Frame", {
+        Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = self.Theme.Accent,
+        BorderSizePixel = 0,
+    })
+    fill.Parent = barBg
+    corner(fill, 3)
 
     local dragging = false
-    bar.InputBegan:Connect(function(input)
+    local function update(input)
+        local rel = math.clamp((input.Position.X - barBg.AbsolutePosition.X) / barBg.AbsoluteSize.X, 0, 1)
+        value = math.floor(min + (max - min) * rel + 0.5)
+        fill.Size = UDim2.new(rel, 0, 1, 0)
+        label.Text = (config.Name or "Slider") .. ": " .. value
+        if flag then self.Flags[flag] = value end
+        if config.Callback then task.spawn(config.Callback, value) end
+    end
+
+    barBg.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
+            update(input)
         end
     end)
-    UserInputService.InputEnded:Connect(function(input)
+    table.insert(self.Connections, UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
+    end))
+    table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
-        or input.UserInputType == Enum.UserInputType.Touch) then
-            local relX = math.clamp((input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-            value = math.floor(min + (max - min) * relX)
-            fill.Size = UDim2.new(relX, 0, 1, 0)
-            label.Text = name .. ": " .. value
-            if callback then callback(value) end
-        end
-    end)
+    end))
 
-    return bar
+    if flag then self.Flags[flag] = value end
+    return {
+        Set = function(v)
+            v = math.clamp(v, min, max)
+            value = v
+            local rel = (v - min) / (max - min)
+            fill.Size = UDim2.new(rel, 0, 1, 0)
+            label.Text = (config.Name or "Slider") .. ": " .. v
+            if flag then self.Flags[flag] = v end
+        end,
+        Get = function() return value end,
+    }
 end
 
--- ============================================================
--- DROPDOWN
--- ============================================================
-function ALEXUI:CreateDropdown(section, name, options, default, callback)
-    local tab = section.Tab
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        ClipsDescendants = true,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-
-    local selected = default or (options and options[1]) or "Ninguno"
-
-    local header = Create("TextButton", {
-        Size = UDim2.new(1, 0, 0, 32),
-        BackgroundTransparency = 1,
-        Text = name .. ": " .. tostring(selected) .. "  ▼",
-        TextColor3 = Theme.Text,
+-- TextBox
+function AlexUI:CreateTextBox(tab, config)
+    config = config or {}
+    local box = create("TextBox", {
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = self.Theme.Secondary,
+        Text = config.Default or "",
+        PlaceholderText = config.Placeholder or "Escribe aquí...",
+        TextColor3 = self.Theme.Text,
+        PlaceholderColor3 = self.Theme.SubText,
+        TextSize = 13,
         Font = Enum.Font.Gotham,
-        TextSize = 12,
-        AutoButtonColor = false,
-        Parent = container
-    })
-
-    local listFrame = Create("Frame", {
-        Size = UDim2.new(1, -10, 0, 0),
-        Position = UDim2.new(0, 5, 0, 34),
-        BackgroundTransparency = 1,
-        Visible = false,
-        Parent = container
-    })
-
-    tab.Y = tab.Y + 36
-
-    local open = false
-    header.MouseButton1Click:Connect(function()
-        open = not open
-        if open then
-            for _, child in pairs(listFrame:GetChildren()) do
-                if child:IsA("TextButton") then child:Destroy() end
-            end
-            for i, opt in pairs(options) do
-                local optBtn = Create("TextButton", {
-                    Size = UDim2.new(1, 0, 0, 26),
-                    Position = UDim2.new(0, 0, 0, (i - 1) * 28),
-                    BackgroundColor3 = Theme.Background,
-                    Text = tostring(opt),
-                    TextColor3 = Theme.Text,
-                    Font = Enum.Font.Gotham,
-                    TextSize = 11,
-                    Parent = listFrame
-                })
-                Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = optBtn })
-                optBtn.MouseButton1Click:Connect(function()
-                    selected = opt
-                    header.Text = name .. ": " .. tostring(opt) .. "  ▼"
-                    open = false
-                    container.Size = UDim2.new(1, -20, 0, 32)
-                    listFrame.Visible = false
-                    if callback then callback(opt) end
-                end)
-            end
-            local height = math.min(#options * 28, 130)
-            container.Size = UDim2.new(1, -20, 0, 32 + height + 5)
-            listFrame.Size = UDim2.new(1, -10, 0, height)
-            listFrame.Visible = true
-        else
-            container.Size = UDim2.new(1, -20, 0, 32)
-            listFrame.Visible = false
-        end
-    end)
-
-    return header
-end
-
--- ============================================================
--- TEXTBOX
--- ============================================================
-function ALEXUI:CreateTextbox(section, name, placeholder, callback)
-    local tab = section.Tab
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-    tab.Y = tab.Y + 36
-
-    local box = Create("TextBox", {
-        Size = UDim2.new(1, -24, 1, -8),
-        Position = UDim2.new(0, 12, 0, 4),
-        BackgroundTransparency = 1,
-        Text = "",
-        PlaceholderText = placeholder or name,
-        PlaceholderColor3 = Theme.SubText,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
+        BorderSizePixel = 0,
         ClearTextOnFocus = false,
-        Parent = container
     })
+    box.Parent = tab.Page
+    corner(box, 6)
+    local s = stroke(box, self.Theme.Stroke, 1)
 
-    box.FocusLost:Connect(function()
-        if callback then callback(box.Text) end
+    box.Focused:Connect(function()
+        TweenService:Create(s, TweenInfo.new(0.15), { Color = self.Theme.Accent }):Play()
     end)
-
+    box.FocusLost:Connect(function()
+        TweenService:Create(s, TweenInfo.new(0.15), { Color = self.Theme.Stroke }):Play()
+        if config.Callback then task.spawn(config.Callback, box.Text) end
+    end)
     return box
 end
 
--- ============================================================
--- COLORPICKER
--- ============================================================
-function ALEXUI:CreateColorpicker(section, name, default, callback)
-    local tab = section.Tab
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-    tab.Y = tab.Y + 36
+-- Dropdown
+function AlexUI:CreateDropdown(tab, config)
+    config = config or {}
+    local options = config.Options or {}
+    local selected = config.Default or (options[1] or "")
+    local open = false
+    local flag = config.Flag
 
-    Create("TextLabel", {
-        Size = UDim2.new(1, -60, 1, 0),
-        Position = UDim2.new(0, 12, 0, 0),
+    local container = create("Frame", {
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = self.Theme.Secondary,
+        BorderSizePixel = 0,
+        ClipsDescendants = false,
+    })
+    container.Parent = tab.Page
+    corner(container, 6)
+    stroke(container, self.Theme.Stroke, 1)
+
+    local btn = create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 36),
         BackgroundTransparency = 1,
-        Text = name,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = container
-    })
-
-    local colorBtn = Create("TextButton", {
-        Size = UDim2.new(0, 38, 0, 20),
-        Position = UDim2.new(1, -48, 0.5, -10),
-        BackgroundColor3 = default or Color3.fromRGB(255, 0, 0),
         Text = "",
         AutoButtonColor = false,
-        Parent = container
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 7), Parent = colorBtn })
+    btn.Parent = container
 
-    local palette = {
-        Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0), Color3.fromRGB(0, 0, 255),
-        Color3.fromRGB(255, 255, 0), Color3.fromRGB(255, 0, 255), Color3.fromRGB(0, 255, 255),
-        Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 0, 0)
-    }
-    local index = 1
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, -40, 1, 0),
+        Position = UDim2.new(0, 14, 0, 0),
+        BackgroundTransparency = 1,
+        Text = (config.Name and config.Name .. ": " or "") .. selected,
+        TextColor3 = self.Theme.Text,
+        TextSize = 13,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    label.Parent = container
 
-    colorBtn.MouseButton1Click:Connect(function()
-        index = index + 1
-        if index > #palette then index = 1 end
-        colorBtn.BackgroundColor3 = palette[index]
-        if callback then callback(palette[index]) end
+    local arrow = create("TextLabel", {
+        Size = UDim2.new(0, 30, 1, 0),
+        Position = UDim2.new(1, -30, 0, 0),
+        BackgroundTransparency = 1,
+        Text = "▼",
+        TextColor3 = self.Theme.SubText,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+    })
+    arrow.Parent = container
+
+    -- Panel de opciones
+    local panel = create("ScrollingFrame", {
+        Size = UDim2.new(1, 0, 0, 0),
+        Position = UDim2.new(0, 0, 1, 4),
+        BackgroundColor3 = self.Theme.Panel,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 3,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        Visible = false,
+        ZIndex = 10,
+    })
+    panel.Parent = container
+    corner(panel, 6)
+    stroke(panel, self.Theme.Stroke, 1)
+    local list = create("UIListLayout", {
+        Padding = UDim.new(0, 2),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = panel,
+    })
+    padding(panel, 4, 4, 4, 4)
+
+    local function selectOption(opt)
+        selected = opt
+        if flag then self.Flags[flag] = opt end
+        label.Text = (config.Name and config.Name .. ": " or "") .. opt
+        if config.Callback then task.spawn(config.Callback, opt) end
+    end
+
+    for _, opt in ipairs(options) do
+        local optBtn = create("TextButton", {
+            Size = UDim2.new(1, 0, 0, 28),
+            BackgroundColor3 = self.Theme.Secondary,
+            Text = tostring(opt),
+            TextColor3 = self.Theme.Text,
+            TextSize = 12,
+            Font = Enum.Font.Gotham,
+            BorderSizePixel = 0,
+            AutoButtonColor = false,
+        })
+        optBtn.Parent = panel
+        corner(optBtn, 4)
+        optBtn.MouseEnter:Connect(function()
+            TweenService:Create(optBtn, TweenInfo.new(0.1), {
+                BackgroundColor3 = self.Theme.Accent,
+            }):Play()
+        end)
+        optBtn.MouseLeave:Connect(function()
+            TweenService:Create(optBtn, TweenInfo.new(0.1), {
+                BackgroundColor3 = self.Theme.Secondary,
+            }):Play()
+        end)
+        optBtn.MouseButton1Click:Connect(function()
+            selectOption(opt)
+            open = false
+            panel.Visible = false
+            TweenService:Create(container, TweenInfo.new(0.15), {
+                Size = UDim2.new(1, 0, 0, 36)
+            }):Play()
+            arrow.Text = "▼"
+        end)
+    end
+    list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        panel.CanvasSize = UDim2.new(0, 0, 0, list.AbsoluteContentSize.Y + 8)
     end)
 
-    return colorBtn
+    btn.MouseButton1Click:Connect(function()
+        open = not open
+        panel.Visible = open
+        if open then
+            local h = math.min(#options * 30 + 10, 150)
+            TweenService:Create(container, TweenInfo.new(0.15), {
+                Size = UDim2.new(1, 0, 0, 36 + h)
+            }):Play()
+            panel.Size = UDim2.new(1, 0, 0, h)
+        else
+            TweenService:Create(container, TweenInfo.new(0.15), {
+                Size = UDim2.new(1, 0, 0, 36)
+            }):Play()
+        end
+        arrow.Text = open and "▲" or "▼"
+    end)
+
+    if flag then self.Flags[flag] = selected end
+    return {
+        Set = function(v) selectOption(v) end,
+        Get = function() return selected end,
+    }
 end
 
--- ============================================================
--- KEYBIND
--- ============================================================
-function ALEXUI:CreateKeybind(section, name, defaultKey, callback)
-    local tab = section.Tab
-    local container = Create("Frame", {
-        Size = UDim2.new(1, -20, 0, 32),
-        Position = UDim2.new(0, 10, 0, tab.Y),
-        BackgroundColor3 = Theme.Element,
-        Parent = section.Frame
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = container })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.5, Parent = container })
-    tab.Y = tab.Y + 36
-
-    Create("TextLabel", {
-        Size = UDim2.new(1, -80, 1, 0),
-        Position = UDim2.new(0, 12, 0, 0),
-        BackgroundTransparency = 1,
-        Text = name,
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = container
-    })
-
-    local keyBtn = Create("TextButton", {
-        Size = UDim2.new(0, 60, 0, 20),
-        Position = UDim2.new(1, -70, 0.5, -10),
-        BackgroundColor3 = Theme.Background,
-        Text = defaultKey or "NONE",
-        TextColor3 = Theme.Text,
-        Font = Enum.Font.GothamBold,
-        TextSize = 11,
-        AutoButtonColor = false,
-        Parent = container
-    })
-    Create("UICorner", { CornerRadius = UDim.new(0, 7), Parent = keyBtn })
-
+-- Keybind
+function AlexUI:CreateKeybind(tab, config)
+    config = config or {}
+    local currentKey = config.Default or Enum.KeyCode.E
+    local flag = config.Flag
     local listening = false
+
+    local frame = create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = self.Theme.Secondary,
+        Text = "",
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+    })
+    frame.Parent = tab.Page
+    corner(frame, 6)
+    stroke(frame, self.Theme.Stroke, 1)
+
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, -120, 1, 0),
+        Position = UDim2.new(0, 14, 0, 0),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Keybind",
+        TextColor3 = self.Theme.Text,
+        TextSize = 13,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    label.Parent = frame
+
+    local keyBtn = create("TextButton", {
+        Size = UDim2.new(0, 90, 0, 24),
+        Position = UDim2.new(1, -100, 0.5, -12),
+        BackgroundColor3 = self.Theme.Background,
+        Text = currentKey.Name,
+        TextColor3 = self.Theme.Text,
+        TextSize = 12,
+        Font = Enum.Font.GothamSemibold,
+        BorderSizePixel = 0,
+        AutoButtonColor = false,
+    })
+    keyBtn.Parent = frame
+    corner(keyBtn, 5)
+
     keyBtn.MouseButton1Click:Connect(function()
         listening = true
         keyBtn.Text = "..."
+        keyBtn.TextColor3 = self.Theme.Accent
     end)
 
-    UserInputService.InputBegan:Connect(function(input, gp)
+    table.insert(self.Connections, UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
         if listening and input.UserInputType == Enum.UserInputType.Keyboard then
-            keyBtn.Text = input.KeyCode.Name
+            currentKey = input.KeyCode
+            keyBtn.Text = currentKey.Name
+            keyBtn.TextColor3 = self.Theme.Text
             listening = false
-            if callback then callback(input.KeyCode) end
+            if flag then self.Flags[flag] = currentKey end
+            if config.OnChanged then task.spawn(config.OnChanged, currentKey) end
+        elseif input.KeyCode == currentKey and not listening then
+            if config.Callback then task.spawn(config.Callback) end
         end
-    end)
+    end))
 
-    return keyBtn
+    if flag then self.Flags[flag] = currentKey end
+    return {
+        Set = function(k)
+            currentKey = k
+            keyBtn.Text = k.Name
+            if flag then self.Flags[flag] = k end
+        end,
+        Get = function() return currentKey end,
+    }
 end
 
--- ============================================================
--- LABEL
--- ============================================================
-function ALEXUI:CreateLabel(section, text)
-    local tab = section.Tab
-    local label = Create("TextLabel", {
-        Size = UDim2.new(1, -20, 0, 22),
-        Position = UDim2.new(0, 10, 0, tab.Y),
+-- Label / Párrafo
+function AlexUI:CreateLabel(tab, text)
+    local label = create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 24),
         BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = Theme.SubText,
+        Text = text or "",
+        TextColor3 = self.Theme.Text,
+        TextSize = 13,
         Font = Enum.Font.Gotham,
-        TextSize = 11,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = section.Frame
+        TextWrapped = true,
     })
-    tab.Y = tab.Y + 26
+    label.Parent = tab.Page
     return label
 end
 
--- ============================================================
--- NOTIFICACIÓN
--- ============================================================
-local notifCount = 0
-function ALEXUI:Notify(title, text, duration)
-    duration = duration or 3
-    notifCount = notifCount + 1
-    local notif = Create("Frame", {
-        Size = UDim2.new(0, 260, 0, 60),
-        Position = UDim2.new(1, -270, 0, 20 + (notifCount - 1) * 70),
-        BackgroundColor3 = Theme.Header,
+-- ============================================
+-- NOTIFICACIONES
+-- ============================================
+AlexUI.NotifyIndex = 0
+
+function AlexUI:Notify(config)
+    config = config or {}
+    AlexUI.NotifyIndex = Alex",
+UI.NotifyIndex +    1
+    local idx = Alex Callback = functionUI.NotifyIndex
+
+    local notif = create("Frame", {
+        Name = "Notify" .. idx,
+        Size = UDim2.new(0, 280, 0, 68),
+        Position = UDim2.new(1, 20, 0, 60 + (idx - 1) * 78),
+        BackgroundColor3 = self.Theme.Panel,
         BorderSizePixel = 0,
-        Parent = self.ScreenGui
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = notif })
-    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.3, Parent = notif })
+    notif.Parent = self.ScreenGui
+    corner(notif, 8)
+    local s = stroke(notif, self.Theme.Accent, 1)
 
-    Create("Frame", {
-        Size = UDim2.new(0, 3, 0, 32),
-        Position = UDim2.new(0, 8, 0.5, -16),
-        BackgroundColor3 = Theme.Accent,
+    -- Barra lateral de color
+    local side = create("Frame", {
+        Size = UDim2.new(0, 4, 1, 0),
+        BackgroundColor3 = self.Theme.Accent,
         BorderSizePixel = 0,
-        Parent = notif
     })
+    side.Parent = notif
+    corner(side, 8)
 
-    Create("TextLabel", {
-        Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 18, 0, 8),
-        BackgroundTransparency = 1, Text = title, TextColor3 = Theme.Accent,
-        Font = Enum.Font.GothamBold, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
+    local title = create("TextLabel", {
+        Size = UDim2.new(1, -30, 0, 22),
+        Position = UDim2.new(0, 16, 0, 8),
+        BackgroundTransparency = 1,
+        Text = config.Title or "Alex-UI",
+        TextColor3 = self.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
     })
+    title.Parent = notif
 
-    Create("TextLabel", {
-        Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 18, 0, 30),
-        BackgroundTransparency = 1, Text = text, TextColor3 = Theme.Text,
-        Font = Enum.Font.Gotham, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, Parent = notif
+    local text = create("TextLabel", {
+        Size = UDim2.new(1, -30, 0, 28),
+        Position = UDim2.new(0, 16, 0, 32),
+        BackgroundTransparency = 1,
+        Text = config.Text or "",
+        TextColor3 = self.Theme.SubText,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextWrapped = true,
     })
+    text.Parent = notif
 
-    task.delay(duration, function() notif:Destroy() end)
+    -- Animación entrada
+    TweenService:Create(notif, TweenInfo.new(0.35, Enum.EasingStyle.Quart), {
+        Position = UDim2.new(1, -300, 0, 60 + (idx - 1) * 78)
+    }):Play()
+
+    task.delay(config.Duration or 4, function()
+        TweenService:Create(notif, TweenInfo.new(0.3), {
+            Position = UDim2.new(1, 20, 0, 60 + (idx - 1) * 78)
+        }):Play()
+        task.wait(0.35)
+        notif:Destroy()
+        AlexUI.NotifyIndex = math.max(0, AlexUI.NotifyIndex - 1)
+    end)
 end
 
-function ALEXUI:SetTheme(name) return true end
-function ALEXUI:GetThemes() return {"Default", "SpeedHub", "Midnight"} end
+-- ============================================
+-- CONFIG SAVE / LOAD
+-- ============================================
+function AlexUI:SaveConfig(filename)
+    if not writefile then
+        self:Notify({ Title = "Error", Text = "writefile no disponible" })
+        return
+    end
+    filename = filename or "AlexUI_Config.json"
+    local data = {}
+    for k, v in pairs(self.Flags) do
+        if typeof(v) == "EnumItem" then
+            data[k] = { __type = "EnumItem", value = v.Name }
+        else
+            data[k] = v
+        end
+    end
+    writefile(filename, game:GetService("HttpService"):JSONEncode(data))
+    self:Notify({ Title = "Config", Text = "Guardado en " .. filename })
+end
 
-return ALEXUI
+function AlexUI:LoadConfig(filename)
+    if not (isfile and readfile) then
+        self:Notify({ Title = "Error", Text = "readfile no disponible" })
+        return
+    end
+    filename = filename or "AlexUI_Config.json"
+    if not isfile(filename) then
+        self:Notify({ Title = "Error", Text = "Archivo no encontrado" })
+        return
+    end
+    local ok, data = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(readfile(filename))
+    end)
+    if not ok then
+        self:Notify({ Title = "Error", Text = "Config inválido" })
+        return
+    end
+    for k, v in pairs(data) do
+        self.Flags[k] = v
+    end
+    self:Notify({ Title = "Config", Text = "Cargado desde " .. filename })
+end
+
+-- ============================================
+-- DESTRUIR
+-- ============================================
+function AlexUI:Destroy()
+    for _, conn in pairs(self.Connections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    if self.ScreenGui then self.ScreenGui:Destroy() end
+end
+
+-- ============================================
+-- RETORNO
+-- ============================================
+return AlexUI
