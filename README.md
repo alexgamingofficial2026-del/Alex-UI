@@ -1,4 +1,4 @@
-# Alex UI
+# ALEX UI
 
 Una librería de interfaz moderna, ligera y **100% compatible con Delta Executor en móvil**, diseñada para ser fácil de usar y con un diseño oscuro y elegante.
 
